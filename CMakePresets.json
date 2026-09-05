@@ -1,0 +1,36 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "displayName": "devshell (Debug)",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" },
+      "environment": {
+        "//": "Nix's cmake setup-hook only promotes NIXPKGS_CMAKE_PREFIX_PATH to the real CMAKE_PREFIX_PATH during a package build, not in `nix develop`. Bridge it from the calling (devshell) environment so find_package(SymEngine) resolves.",
+        "CMAKE_PREFIX_PATH": "$penv{NIXPKGS_CMAKE_PREFIX_PATH}"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "dev", "configurePreset": "dev" }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "output": { "outputOnFailure": true }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "dev",
+      "steps": [
+        { "type": "configure", "name": "dev" },
+        { "type": "build", "name": "dev" },
+        { "type": "test", "name": "dev" }
+      ]
+    }
+  ]
+}
