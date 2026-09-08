@@ -2,6 +2,7 @@
 
 with pkgs; [
   git
+  github-cli
   cmake
   symengine
   gmp

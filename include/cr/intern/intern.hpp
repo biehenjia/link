@@ -68,6 +68,23 @@ namespace cr {
                 return intern_node(Kind::Pair, var, ops);
             }
 
+            static constexpr uint32_t npos = ~uint32_t(0);
+
+            // Read-only lookup: id of an interned node whose (kind, var,
+            // operands) match exactly, or `npos`. Lets a later pass reuse the
+            // chains this interner already canonicalized without mutating it.
+            uint32_t find_node(Kind kind, uint8_t var, std::span<const uint32_t> operands) const {
+                const uint64_t h = suffix_hash(kind, var, operands);
+                auto [it, end] = nodes_.equal_range(h);
+                for (; it != end; ++it) {
+                    const Node& n = arena_.node(it->second);
+                    if (n.kind == kind && n.var == var
+                        && std::ranges::equal(arena_.operands(it->second), operands))
+                        return it->second;
+                }
+                return npos;
+            }
+
         private:
             static uint64_t suffix_hash(Kind kind, uint8_t var, std::span<const uint32_t> operands) {
                 uint64_t h = hfold(0, (uint64_t(kind) << 8) | var);
